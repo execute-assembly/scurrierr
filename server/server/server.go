@@ -109,6 +109,11 @@ func (s *Server) GetTaskEndpoint(c *gin.Context) {
 		res := utils.CraftErrorResponse(ERROR_SERVER_ERROR)
 		c.Data(503, "application/octet-stream", res)
 	}
+	fmt.Printf("Sending %d-Bytes\n", len(commandBytes))
+	fmt.Printf("\n\n\n")
+	fmt.Println(commandBytes)
+	fmt.Printf("\n\n\n")
+	
 	c.Data(200, "application/octet-stream", commandBytes)
 	return
 

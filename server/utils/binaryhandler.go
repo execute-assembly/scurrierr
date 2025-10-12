@@ -51,7 +51,9 @@ func WriteString(w io.Writer, str string) error {
 
 func CraftErrorResponse(code uint32) []byte {
     var buf bytes.Buffer
-    Write4Bytes(&buf, code)
+    if err := Write4Bytes(&buf, code); err != nil {
+        return nil
+    }
     return buf.Bytes()
 }
 
@@ -92,15 +94,20 @@ func CraftCommandBytes(cmd *types.CommandReply) []byte {
         var buf bytes.Buffer
 
         // 0 == no error, just makes it easier for the RAT to quickly know if error or not
-        Write4Bytes(&buf, uint32(0))
-
-        Write4Bytes(&buf, cmd.CommandID)
-        Write4Bytes(&buf, cmd.CommandCode)
+        if err := Write4Bytes(&buf, uint32(0)); err != nil {
+        return nil
+        }
+        if err := Write4Bytes(&buf, cmd.CommandID); err != nil {
+            return nil
+        }
+        if err := Write4Bytes(&buf, cmd.CommandCode); err != nil {
+            return nil
+        }
 
         if cmd.Param1 != "" {
                 err := WriteString(&buf, cmd.Param1)
                 if err != nil {
-                    fmt.Println("error 1")
+                    
                     return nil
                 }
         }
@@ -108,7 +115,7 @@ func CraftCommandBytes(cmd *types.CommandReply) []byte {
         if cmd.Param2 != "" {
                 err := WriteString(&buf, cmd.Param2)
                 if err != nil {
-                    fmt.Println("error 1")
+                    
                     return nil
                 }
         }
@@ -160,13 +167,11 @@ func CreateRegisterResponseBytes(Token string, RefreshToken string) []byte {
 	var buf bytes.Buffer
 
 
-	Write4Bytes(&buf, uint32(0))
+	if err := Write4Bytes(&buf, uint32(0));    err != nil { return nil }
 
-	WriteString(&buf, Token)
+	if err := WriteString(&buf, Token);        err != nil { return nil }
 
-    WriteString(&buf, RefreshToken)
-
-
+    if err := WriteString(&buf, RefreshToken); err != nil { return nil }
 	return buf.Bytes()
 
 }
