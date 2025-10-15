@@ -77,7 +77,6 @@ func (s *Server) RetrieveCommand(UserGuid string) (*types.CommandReply, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("Code -> %d\n ID -> %d\nParam1 -> %s\n param2 -> %s\n", cmd.CommandCode, cmd.CommandID, cmd.Param1, cmd.Param2)
 
 	return cmd, nil
 
