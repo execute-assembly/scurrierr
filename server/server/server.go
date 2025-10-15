@@ -158,7 +158,7 @@ func (s *Server) RegisterEndpoint(c *gin.Context) {
 	if ClientInfo.Guid == "" || ClientInfo.Username == "" || ClientInfo.Hostname == "" || ClientInfo.PID <= 0 || ClientInfo.Arch <= 0 || ClientInfo.Arch >=2 || ClientInfo.Version == "" {
 		res := utils.CraftErrorResponse(ERROR_MISSING_DETAILS)
 		c.Data(400, "application/octet-stream", res)
-    	return
+    		return
 	}
 
 	ok, err := s.LookupIfUserExists(ClientInfo.Username, ClientInfo.Hostname)

@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package pb;
+
+
+message CommandActionReq {
+	string action = 1;
+	int64 guid = 2;
+	int64 command_code = 3;
+	int64 commandID = 2;
+    string param = 5;
+    string param2 = 6;
+    int64 command_id = 8; 
+}
+
+message CommandRespData {
+    bool success = 1;
+    string message = 2;
+}
+
+
+
+message ResolveIdReq {
+	string code_name = 1;
+}
+message ResolveIdReq {
+	int64 guid = 1;
+}
+
+message Users {
+    string code_name = 1;
+    string username = 2;
+    string hostname = 3;
+    string version = 4;
+    string ip = 5;
+    int64 arch = 6;
+    int64 pid = 7;
+    string ast_checkin = 8;
+}
+
+message UserDetails {
+	repeated user Users = 1
+}
+
+
+service CommandService {
+    rpc InsertCommand(CommandReqData) returns (CommandRespData);
+    rpc ResolveClientId(ResolveIdReq) returns (ResolveIdReq);
+    rpc listClients(EmptyRequest) returns(UserDetails)
+}
