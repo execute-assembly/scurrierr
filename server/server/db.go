@@ -48,6 +48,7 @@ var (
 
 
 
+
 func (s *Server) InsertNewUser(Client *types.ClientInfo, ip string) (bool, error) {
 	query := `INSERT INTO clients(guid, code_name, username, hostname, ip, pid, arch, version, last_checkin) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
@@ -68,6 +69,8 @@ type CommandReply struct {
 	Param2 string
 }
 
+
+// remove all of this, update db, dont need to store commands in DB
 func (s *Server) RetrieveCommand(UserGuid string) (*types.CommandReply, error) {
 	cmd := &types.CommandReply{}
 
