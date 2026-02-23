@@ -34,7 +34,7 @@ public:
 	Network();
 
 	BOOL RegisterClient(BYTE* data, size_t length, _Out_ PCHAR ResponseData, DWORD ResponseBufferSize, DWORD* ResponseLength);
-	BOOL GetCommand(_Out_ PCHAR CommandData, SIZE_T BufferSize);
+	BOOL GetCommand(_Out_ PCHAR CommandData, SIZE_T BufferSize, _Out_ INT* TotalRead);
 	BOOL UpdateAuthDetails(PCHAR token, PCHAR refresh, PCHAR ClientID);
 	BOOL PostData(_In_ BYTE* Data, SIZE_T DataLength);
 	BOOL CheckAndSetSSL(HINTERNET hReq);
