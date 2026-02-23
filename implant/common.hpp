@@ -45,5 +45,5 @@ extern PCOMMANDINFO CommandInfo;
 
 
 void XOR(PCHAR src, SIZE_T size, PCHAR out, UCHAR key);
-BOOL ParseCommand(BYTE* data);
+BOOL ParseCommand(BYTE* data, INT SizeOfData);
 
