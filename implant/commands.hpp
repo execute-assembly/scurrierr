@@ -32,12 +32,12 @@ private:
 	
 
 public:
-	
-	void Dispatch            (INT code, PCHAR commandID, PCHAR Param, PCHAR Param2);
+	void Dispatch(PBYTE Data, INT Size);
+	//void Dispatch            (INT code, PCHAR commandID, PCHAR Param, PCHAR Param2);
 	void cmd_getprivs        (PCHAR commandID);
 	void cmd_changedir       (PCHAR CommandID, PCHAR param);
 	void cmd_ls              (PCHAR CommandID, PCHAR Param);
-	void cmd_cp              (PCHAR CommandID, PCHAR source, PCHAR destination);
+	void cmd_cp              (UINT CommandID, PBYTE Data);
 	void cmd_mv              (PCHAR CommandID, PCHAR src, PCHAR dest);
 	void cmd_cat             (PCHAR commandId, PCHAR fileName);
 	void cmd_ps              (PCHAR commandId, PCHAR args);
