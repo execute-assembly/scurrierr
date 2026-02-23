@@ -24,6 +24,9 @@ BOOL AllocateAndLoadNeeded() {
 	KModules            = AllocMemory<MODULES>      (sizeof(struct MODULES));
 	WinApis             = AllocMemory<WINAPIS>      (sizeof(struct WINAPIS));
 
+
+	// fix all below, dont need
+
 	if (AuthConf == NULL || ServerConf == NULL || g_NetworkManager == NULL || KModules == NULL || WinApis == NULL) {
 		return FALSE;
 	}
@@ -217,5 +220,6 @@ BOOL ParseCommand(BYTE* data, INT Size) {
 	return TRUE;
 
 }
+
 
 
